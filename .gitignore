@@ -1,0 +1,5 @@
+.*~
+go/
+.lego/
+.apikey
+services.dat
