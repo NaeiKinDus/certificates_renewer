@@ -50,10 +50,6 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
 fi
 
 ## Options
-# s, --server: which server to use for ACME
-# v, --verbose: display more information
-# l, --lego-bin: path to the lego binary
-# d, --dot-lego: path to the .lego directory
 OPTIONS=s:vl:d:ht
 LONGOPTS=server:,verbose,lego-bin:,dot-lego:,help,dry-run
 
@@ -211,6 +207,6 @@ do
     elif [[ $ACTION == "renew" ]]; then
 	echo -e "Renewing a certificate"
 	GANDIV5_API_KEY=${API_KEY} ${LEGO_BIN} --server ${ACME_SERVER} --path ${DOT_LEGO_DIR} --domains ${DOMAIN} --accept-tos --email naeikindus@0x2a.ninja --dns gandiv5 renew --must-staple --renew-hook "$0 hook ${DOMAIN}" --days 90 > /dev/null
-	echo -e "!! Certificate renewed !!"
+	echo -e "Certificate renewed successfully renewed for ${DOMAIN}"
     fi
 done
