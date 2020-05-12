@@ -1,5 +1,7 @@
 .*~
 go/
 .lego/
-.apikey
+.env
 services.dat
+.idea
+.env.test
