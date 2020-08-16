@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit -o pipefail -o noclobber
+set -o pipefail -o noclobber
 
 function usage() {
   cat <<EOF
@@ -17,52 +17,15 @@ OPTIONS
 -q/--quiet: no output, any error will be fatal
 -e/--env: specify an environment file
 -s/--server <server_url>: URL to use to connect to ACME server
--d/--dry-run: use the staging ACME server"
+-d/--dry-run: use the staging ACME server
 -o/--ocscp-stapling: force OCSP stapling (--must-staple option for lego)
 EOF
 }
 
-#####################
-# Utility functions #
-#####################
-# https://stackoverflow.com/a/45201229
-function mfcb() {
-  local val="$4"
-  "$1"
-  eval "$2[$3]=\$val;"
-}
-
-function val_ltrim() {
-  if [[ "$val" =~ ^[[:space:]]+ ]]; then
-    val="${val:${#BASH_REMATCH[0]}}"
-  fi
-}
-
-function val_rtrim() {
-  if [[ "$val" =~ [[:space:]]+$ ]]; then
-    val="${val:0:${#val}-${#BASH_REMATCH[0]}}"
-  fi
-}
-
-function val_trim() {
-  val_ltrim
-  val_rtrim
-}
-
-function quiet_print() {
-  if [[ $NO_OUTPUT -eq 0 ]]; then
-    echo -e "${1}"
-  fi
-}
-
-function verbose_print() {
-  if [[ $VERBOSE -eq 1 ]]; then
-    quiet_print "${1}"
-  fi
-}
+source ./common.sh
 
 #####################
-# Shellscript entry #
+# Shell script entry #
 #####################
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 ! getopt --test >/dev/null
@@ -156,9 +119,10 @@ if [ -z "${EMAIL_CONTACT}" ]; then
 fi
 
 if [ -z "${DOT_LEGO_DIR}" ]; then
+  # shellcheck disable=SC2086
   DOT_LEGO_DIR="$(dirname ${SCRIPT_PATH})/.lego"
   if [ ! -d "${DOT_LEGO_DIR}" ]; then
-    mkdir -p ${DOT_LEGO_DIR}
+    mkdir -p "${DOT_LEGO_DIR}"
   fi
 fi
 
@@ -172,8 +136,9 @@ if [ "$1" == "hook" ]; then
     exit 1
   fi
 
+  # shellcheck disable=SC2086
   SERVICES_DAT_FILE="$(dirname ${0})/services.dat"
-  if [ ! -f $SERVICES_DAT_FILE ]; then
+  if [ ! -f "${SERVICES_DAT_FILE}" ]; then
     quiet_print "File ${SERVICES_DAT_FILE} does not exist."
     exit 1
   fi
@@ -232,6 +197,7 @@ if [ "$1" == "hook" ]; then
       METHOD_ARGS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${METHOD_ARGS}"
     fi
 
+    # shellcheck disable=SC2086
     METHOD_ARGS="$(echo $METHOD_ARGS | envsubst)"
     verbose_print "- exec: ${METHOD} ${METHOD_ARGS} 2> /dev/null"
 
@@ -239,9 +205,10 @@ if [ "$1" == "hook" ]; then
       quiet_print "${METHOD} ${METHOD_ARGS} 2>/dev/null"
     else
       # shellcheck disable=SC2091
+      # shellcheck disable=SC2086
       $(${METHOD} ${METHOD_ARGS} 2>/dev/null)
     fi
-  done <$SERVICES_DAT_FILE
+  done <"${SERVICES_DAT_FILE}"
   exit 0
 fi
 
@@ -251,7 +218,7 @@ if [ -z "${DNS_CHALLENGE_TYPE}" ]; then
 fi
 
 declare -A ACTIONS=([run]=1 [renew]=1)
-if [ ! ${ACTIONS["$1"]} ]; then
+if [ ! "${ACTIONS["$1"]}" ]; then
   quiet_print "$1 is not a valid action to perform on a certificate, supports 'run' and 'renew'"
   exit 1
 else
