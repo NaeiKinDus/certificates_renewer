@@ -15,8 +15,8 @@ OPTIONS
 -q/--quiet: no output, any error will be fatal
 -v/--verbose: show more debug messages
 -e/--email <mail_address>: email to sent a report when the script is finished
--d/--domain <domain_name>: use a specific domain if multiple keys are present
--t/--dry-run: print the commands instead of running them
+-s/--domain <domain_name>: use a specific domain if multiple keys are present
+-d/--dry-run: print the commands instead of running them
 -c/--cert-name <filename>: name used for the certificate file in destination (must include file extension)
 -k/--key-name <filename>: name used for the private key file in destination (must include file extension)
 --nginx-dir <dir>: directory where the certificate files will be stored for nginx
@@ -159,7 +159,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hve:td:c:k:q
+OPTIONS=hve:ds:c:k:q
 LONGOPTS=help,verbose,email:,dry-run,domain:,cert-name:,key-name:,quiet,nginx-dir:,traefik-dir:,nginx-user:,nginx-group:,traefik-user:,traefik-group:
 
 ! PARSED=$(getopt --options=${OPTIONS} --longoptions=${LONGOPTS} --name "$0" -- "$@")
@@ -195,7 +195,7 @@ while true; do
 	    usage
 	    exit 0
 	    ;;
-	-d|--domain)
+	-s|--domain)
 	    MATCH_DOMAIN="$2"
 	    shift 2
 	    ;;
@@ -207,7 +207,7 @@ while true; do
 	    NOTIF_EMAIL="$2"
 	    shift 2
 	    ;;
-	-t|--dry-run)
+	-d|--dry-run)
 	    DRY_RUN=1
 	    shift
 	    ;;
