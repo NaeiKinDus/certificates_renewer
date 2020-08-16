@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o noclobber
+set -o pipefail -o noclobber
 
 function usage() {
     cat <<EOF
@@ -165,6 +165,11 @@ LONGOPTS=help,verbose,email:,dry-run,domain:,cert-name:,key-name:,quiet,nginx-di
 ! PARSED=$(getopt --options=${OPTIONS} --longoptions=${LONGOPTS} --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
     exit 2
+fi
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
 fi
 
 eval set -- "${PARSED}"
