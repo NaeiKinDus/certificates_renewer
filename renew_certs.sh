@@ -43,6 +43,11 @@ if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
   exit 2
 fi
 
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+fi
+
 eval set -- "${PARSED}"
 ACME_SERVER="https://acme-v02.api.letsencrypt.org/directory"
 VERBOSE=${VERBOSE:=0}
