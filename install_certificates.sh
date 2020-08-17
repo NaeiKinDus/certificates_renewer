@@ -174,12 +174,23 @@ export DEST_KEY_FILENAME
 #############################
 shopt -s nullglob
 module_executed=0
+perform_cleanup=0
 quiet_print "executing enabled actions..."
 for action in "${SCRIPT_DIR}"/enabled-actions/*.sh; do
   module_executed=1
-  verbose_print "- executing ""${action}"
-  source "${action}"
+  if [[ "${action}" =~ .*/cleanup.sh ]]; then
+    verbose_print "- cleanup required, will be executed after all the other actions are executed"
+    perform_cleanup=1
+  else
+    verbose_print "- executing ""${action}"
+    source "${action}"
+  fi
 done
+
+if [ $perform_cleanup -eq 1 ]; then
+  quiet_print "performing cleanup..."
+  source "${SCRIPT_DIR}"/enabled-actions/cleanup.sh
+fi
 
 if [ $module_executed -eq 0 ]; then
   quiet_print "WARNING: no action were called, this script performed absolutely nothing."
