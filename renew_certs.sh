@@ -22,7 +22,10 @@ OPTIONS
 EOF
 }
 
-source ./common.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
+SCRIPT_PATH=${SCRIPT_DIR}$(basename "${BASH_SOURCE[0]}")
+
+source "${SCRIPT_DIR}/common.sh"
 
 #####################
 # Shell script entry #
@@ -114,9 +117,7 @@ if [ ! -f "${ENV_FILE}" ]; then
   echo -e "Missing .env file, please use the provided example and modify it according to your needs or specify one using the -e flag."
   exit 1
 fi
-source ./.env
-
-SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+source "${SCRIPT_DIR}/.env"
 
 if [ -z "${EMAIL_CONTACT}" ]; then
   quiet_print "You must provide an email address"
