@@ -22,8 +22,8 @@ OPTIONS
 EOF
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
-SCRIPT_PATH=${SCRIPT_DIR}$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH=${SCRIPT_DIR}/$(basename "${BASH_SOURCE[0]}")
 
 source "${SCRIPT_DIR}/common.sh"
 
@@ -61,7 +61,7 @@ STAPLE=${STAPLE:=""}
 EMAIL_CONTACT=${EMAIL_CONTACT:=""}
 DRY_RUN=${DRY_RUN:=0}
 DNS_CHALLENGE_TYPE=${DNS_CHALLENGE_TYPE}
-ENV_FILE=${ENV_FILE:=".env"}
+ENV_FILE=${ENV_FILE:="${SCRIPT_DIR}/.env"}
 DNS_RESOLVERS=${DNS_RESOLVERS:=""}
 
 export DRY_RUN
@@ -117,7 +117,7 @@ if [ ! -f "${ENV_FILE}" ]; then
   echo -e "Missing .env file, please use the provided example and modify it according to your needs or specify one using the -e flag."
   exit 1
 fi
-source "${SCRIPT_DIR}/.env"
+source "${ENV_FILE}"
 
 if [ -z "${EMAIL_CONTACT}" ]; then
   quiet_print "You must provide an email address"
