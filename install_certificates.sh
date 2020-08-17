@@ -14,7 +14,8 @@ OPTIONS
 -h/--help: show this menu
 -q/--quiet: no output, any error will be fatal
 -v/--verbose: show more debug messages
--e/--email <mail_address>: email to sent a report when the script is finished
+-e/--env: specify an environment file
+-m/--email <mail_address>: email to sent a report when the script is finished
 -s/--domain <domain_name>: use a specific domain if multiple keys are present
 -d/--dry-run: print the commands instead of running them
 -c/--cert-name <filename>: name used for the certificate file in destination (must include file extension)
@@ -28,65 +29,12 @@ OPTIONS
 EOF
 }
 
-#####################
-# Utility functions #
-#####################
-function quiet_print() {
-    if [[ $NO_OUTPUT -eq 0 ]]; then
-	echo -e $1
-    fi
-}
-
-function verbose_print() {
-    if [[ $VERBOSE -eq 1 ]]; then
-	quiet_print "$1"
-    fi
-}
-
-function copy_files() {
-    SRC_FILE=$1
-    DST_FILE=$2
-
-    if [ -z "${SRC_FILE}" ]; then
-	quiet_print "No source file given"
-	exit 3
-    elif [ -z "${DST_FILE}" ]; then
-	quiet_print "No destination file given"
-	exit 3
-    fi
-
-    verbose_print "Copying ${SRC_FILE} to ${DST_FILE}"
-    if [[ $DRY_RUN -eq 1 ]]; then
-	quiet_print "/bin/cp ${SRC_FILE} ${DST_FILE}"
-    else
-	verbose_print "/bin/cp ${SRC_FILE} ${DST_FILE}"
-	/bin/cp ${SRC_FILE} ${DST_FILE}
-	if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-	    quiet_print "Could not copy files to ${DST_FILE}"
-	    exit 4
-	fi
-    fi
-
-}
-
-function do_chown() {
-    USER=$1
-    shift
-    GROUP=$1
-    shift
-
-    for ITEM in $@; do
-	if [ $VERBOSE -eq 1 ] || [ $DRY_RUN -eq 1 ]; then
-	    echo "chown ${USER}:${GROUP} ${ITEM}"
-	fi
-	if [ $DRY_RUN -ne 1 ]; then
-	    chown ${USER}:${GROUP} ${ITEM}
-	fi
-    done
-}
+source ./common.sh
 
 function cleanup() {
-    echo "Cleanup"
+  verbose_print "Cleaning up..."
+  verbose_print "rm -f ${CERT_FILE}"
+  verbose_print "rm -f ${KEY_FILE}"
 }
 
 #####################################
@@ -102,11 +50,11 @@ function update_nginx() {
 
     # CRT update
     copy_files "${CERT_FILE}" "${NGINX_DIR}/${DEST_CERT_FILENAME}"
-    do_chown ${NGINX_USER} ${NGINX_GROUP} "${NGINX_DIR}/${DEST_CERT_FILENAME}"
+    do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${NGINX_DIR}/${DEST_CERT_FILENAME}"
 
     # Private key update
     copy_files "${KEY_FILE}" "${NGINX_DIR}/${DEST_KEY_FILENAME}"
-    do_chown ${NGINX_USER} ${NGINX_GROUP} "${NGINX_DIR}/${DEST_KEY_FILENAME}"
+    do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${NGINX_DIR}/${DEST_KEY_FILENAME}"
 
     # Reloading Nginx
     verbose_print "Certificate updated, reloading Nginx..."
@@ -125,18 +73,18 @@ function update_nginx() {
 function update_traefik() {
     quiet_print "Running traefik update..."
 
-    if [ ! -d $TRAEFIK_DIR ]; then
+    if [ ! -d "${TRAEFIK_DIR}" ]; then
 	quiet_print "Destination directory ${TRAEFIK_DIR} does not exist !"
 	exit 4
     fi
 
     # CRT update
     copy_files "${CERT_FILE}" "${TRAEFIK_DIR}/${DEST_CERT_FILENAME}"
-    do_chown ${TRAEFIK_USER} ${TRAEFIK_GROUP} "${TRAEFIK_DIR}/${DEST_CERT_FILENAME}"
+    do_chown "${TRAEFIK_USER}" "${TRAEFIK_GROUP}" "${TRAEFIK_DIR}/${DEST_CERT_FILENAME}"
 
     # Private key update
     copy_files "${KEY_FILE}" "${TRAEFIK_DIR}/${DEST_KEY_FILENAME}"
-    do_chown ${TRAEFIK_USER} ${TRAEFIK_GROUP} "${TRAEFIK_DIR}/${DEST_KEY_FILENAME}"
+    do_chown "${TRAEFIK_USER}" "${TRAEFIK_GROUP}" "${TRAEFIK_DIR}/${DEST_KEY_FILENAME}"
 
     verbose_print "Certificate updated, reloading Traefik..."
     if [[ $DRY_RUN -eq 1 ]]; then
@@ -151,7 +99,7 @@ function update_traefik() {
 }
 
 #####################
-# Shellscript entry #
+# Shell script entry #
 #####################
 ! getopt --test > /dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
@@ -159,8 +107,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hve:ds:c:k:q
-LONGOPTS=help,verbose,email:,dry-run,domain:,cert-name:,key-name:,quiet,nginx-dir:,traefik-dir:,nginx-user:,nginx-group:,traefik-user:,traefik-group:
+OPTIONS=hvm:e:ds:c:k:q
+LONGOPTS=help,verbose,email:,env:,dry-run,domain:,cert-name:,key-name:,quiet,nginx-dir:,traefik-dir:,nginx-user:,nginx-group:,traefik-user:,traefik-group:
 
 ! PARSED=$(getopt --options=${OPTIONS} --longoptions=${LONGOPTS} --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
@@ -174,19 +122,25 @@ fi
 
 eval set -- "${PARSED}"
 # Defaults
-NOTIF_EMAIL=
-VERBOSE=0
-DRY_RUN=0
-MATCH_DOMAIN=
-DST_CERT_NAME=
-DST_KEY_NAME=
-NO_OUTPUT=0
-NGINX_DIR="/etc/nginx/ssl"
-TRAEFIK_DIR="/home/traefik/ssl"
-NGINX_USER="www-data"
-NGINX_GROUP="www-data"
-TRAEFIK_USER="traefik"
-TRAEFIK_GROUP="traefik"
+EMAIL_CONTACT=
+VERBOSE=${VERBOSE:=0}
+DRY_RUN=${DRY_RUN:=0}
+MATCH_DOMAIN=${MATCH_DOMAIN:=""}
+DST_CERT_NAME=${DST_CERT_NAME:=""}
+DST_KEY_NAME=${DST_KEY_NAME:=""}
+NO_OUTPUT=${NO_OUTPUT:=0}
+NGINX_DIR=${NGINX_DIR:="/etc/nginx/ssl"}
+TRAEFIK_DIR=${TRAEFIK_DIR:="/home/traefik/ssl"}
+NGINX_USER=${NGINX_USER:="www-data"}
+NGINX_GROUP=${NGINX_GROUP:="www-data"}
+TRAEFIK_USER=${TRAEFIK_USER:="traefik"}
+TRAEFIK_GROUP=${TRAEFIK_GROUP:="traefik"}
+ENV_FILE=${ENV_FILE:=".env"}
+
+export DRY_RUN
+export EMAIL_CONTACT
+export NO_OUTPUT
+export VERBOSE
 
 # Options
 while true; do
@@ -203,8 +157,12 @@ while true; do
 	    VERBOSE=1
 	    shift
 	    ;;
-	-e|--email)
-	    NOTIF_EMAIL="$2"
+	-e|--env)
+	    ENV_FILE="$2"
+      shift 2
+	    ;;
+	-m|--email)
+	    EMAIL_CONTACT="$2"
 	    shift 2
 	    ;;
 	-d|--dry-run)
@@ -224,23 +182,23 @@ while true; do
 	    shift
 	    ;;
 	--nginx-dir)
-	    NGINX_DIR="$2"
+	    NGINX_DIR="${2}"
 	    shift 2
 	    ;;
 	--nginx-user)
-	    NGINX_USER="$2"
+	    NGINX_USER="${2}"
 	    shift 2
 	    ;;
 	--nginx-group)
-	    NGINX_GROUP="$2"
+	    NGINX_GROUP="${2}"
 	    shift 2
 	    ;;
 	--traefik-dir)
-	    TRAEFIK_DIR="$2"
+	    TRAEFIK_DIR="${2}"
 	    shift 2
 	    ;;
 	--traefik-user)
-	    TRAEFIK_USER="$2"
+	    TRAEFIK_USER="${2}"
 	    shift 2
 	    ;;
 	--traefik-group)
@@ -252,21 +210,33 @@ while true; do
 	    break
 	    ;;
 	*)
-	    echo "Unsupported option: $1"
+	    echo "Unsupported option: ${1}"
 	    exit 3
 	    ;;
     esac
 done
 
-if [ -z "$1" ]; then
+export ENV_FILE
+
+if [ ! -f "${ENV_FILE}" ]; then
+  echo -e "Missing .env file, please use the provided example and modify it according to your needs or specify one using the -e flag."
+  exit 1
+fi
+source ./.env
+
+if [ -z "${1}" ]; then
     quiet_print "Missing <dir> argument."
     exit 1
 fi
 
-CERT_DIR="$(realpath $1)"
+# shellcheck disable=SC2086
+CERT_DIR="$(realpath ${1})"
+# shellcheck disable=SC2086
 CERT_FILE="$(find ${CERT_DIR} -iname \*${MATCH_DOMAIN}\*.crt 2> /dev/null)"
+# shellcheck disable=SC2086
 KEY_FILE="$(find ${CERT_DIR} -iname \*${MATCH_DOMAIN}\*.key 2> /dev/null)"
 
+# shellcheck disable=SC2086
 if [[ "$(echo \"${CERT_FILE}\" | wc -w)" -gt 1 ]]; then
     quiet_print "More than 1 certificate files were found, please use --domain to narrow down to only one domain."
     exit 2
@@ -286,12 +256,14 @@ if [ -z "${KEY_FILE}" ]; then
 fi
 
 if [ -z "${DST_CERT_NAME}" ]; then
+    # shellcheck disable=SC2086
     DEST_CERT_FILENAME="$(basename ${CERT_FILE})"
 else
     DEST_CERT_FILENAME="${DST_CERT_NAME}"
 fi
 
 if [ -z "${DST_KEY_NAME}" ]; then
+    # shellcheck disable=SC2086
     DEST_KEY_FILENAME="$(basename ${KEY_FILE})"
 else
     DEST_KEY_FILENAME="${DST_KEY_NAME}"
