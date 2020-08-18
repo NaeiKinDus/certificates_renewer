@@ -39,6 +39,26 @@ function verbose_print() {
   fi
 }
 
+function assert_defined() {
+  VAL_NAME=${1}
+  DATA=${2}
+
+  if [ -z "${DATA}" ]; then
+    echo -e "'${VAL_NAME}' is empty, aborted."
+    exit 5
+  fi
+}
+
+function assert_executable() {
+  FILE_NAME=${1}
+  EXEC_FILE=${2}
+
+  if [ ! -x "${EXEC_FILE}" ]; then
+    echo -e "${FILE_NAME} (${EXEC_FILE}) is not a valid executable."
+    exit 5
+  fi
+}
+
 function copy_files() {
   SRC_FILE="${1}"
   DST_FILE="${2}"
