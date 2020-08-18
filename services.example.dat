@@ -2,7 +2,7 @@
 # As for crontabs, a newline is required at the end of the file.
 # /!\ NOTE /!\
 # It is not needed to add the "UserKnownHostsFile=/dev/null", it is automatically appended.
-# It is not needed to add the "StrictHostKeyChecking=no", it is automatically appended.
+# It is not needed to add the "StrictHostKeyChecking=accept-new", it is automatically appended.
 #
 # Available variables:
 ## $CERT_PATH: path to domain certificate

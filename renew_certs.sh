@@ -200,7 +200,7 @@ if [ "$1" == "hook" ]; then
     fi
 
     if [[ $METHOD == "ssh" || $METHOD == "scp" ]]; then
-      METHOD_ARGS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${METHOD_ARGS}"
+      METHOD_ARGS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=accept-new ${METHOD_ARGS}"
     fi
 
     # shellcheck disable=SC2086
