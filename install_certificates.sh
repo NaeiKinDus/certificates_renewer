@@ -209,11 +209,7 @@ while read -r LINE; do
   readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
   verbose_print "Executing '${CALL_STACK[*]}'"
   if [ -n "$(LC_ALL=C type -t "${CALL_STACK[0]}")" ]; then
-    if [[ ${DRY_RUN} -eq 1 ]]; then
-      quiet_print "${CALL_STACK[*]}"
-    else
       ${CALL_STACK[*]}
-    fi
   else
     quiet_print "Action '${CALL_STACK[0]}' does not exist, ignored"
   fi
