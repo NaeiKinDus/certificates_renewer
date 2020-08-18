@@ -130,6 +130,12 @@ if [ -z "${1}" ]; then
     exit 1
 fi
 
+ACTIONS_CFG_FILE="${SCRIPT_DIR}""/actions.cfg"
+if [ ! -f "${ACTIONS_CFG_FILE}" ]; then
+  quiet_print "File ${ACTIONS_CFG_FILE} does not exist."
+  exit 1
+fi
+
 CERT_DIR="$(realpath "${1}")"
 CERT_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.crt 2> /dev/null)"
 KEY_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.key 2> /dev/null)"
@@ -170,22 +176,40 @@ fi
 export DEST_KEY_FILENAME
 
 #############################
-# Executing enabled actions #
+# Loading enabled actions #
 #############################
 shopt -s nullglob
 module_executed=0
 perform_cleanup=0
-quiet_print "executing enabled actions..."
+quiet_print "loading enabled actions..."
 for action in "${SCRIPT_DIR}"/enabled-actions/*.sh; do
   module_executed=1
   if [[ "${action}" =~ .*/cleanup.sh ]]; then
     verbose_print "- cleanup required, will be executed after all the other actions are executed"
     perform_cleanup=1
   else
-    verbose_print "- executing ""${action}"
+    verbose_print "- loading ""${action}"
     source "${action}"
   fi
 done
+
+################################
+# Executing configured actions #
+################################
+while read -r LINE; do
+  if [[ ${LINE:0:1} == "#" ]]; then
+    continue
+  fi
+
+  readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
+  verbose_print "Executing '${CALL_STACK[*]}'"
+  if [ -n "$(LC_ALL=C type -t "${CALL_STACK[0]}")" ]; then
+    ${CALL_STACK[*]}
+  else
+    quiet_print "Action '${CALL_STACK[0]}' does not exist, ignored"
+  fi
+  unset CALL_STACK
+done <"${ACTIONS_CFG_FILE}"
 
 if [ $perform_cleanup -eq 1 ]; then
   quiet_print "performing cleanup..."

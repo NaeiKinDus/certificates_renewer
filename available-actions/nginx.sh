@@ -35,5 +35,3 @@ function update_nginx() {
 NGINX_USER=${NGINX_USER:="www-data"}
 NGINX_GROUP=${NGINX_GROUP:="www-data"}
 NGINX_DIR=${NGINX_DIR:="/etc/nginx/ssl"}
-
-update_nginx

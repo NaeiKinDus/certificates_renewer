@@ -2,6 +2,7 @@
 go/
 .lego/
 .env
-services.dat
+services.cfg
+actions.cfg
 .idea
 .env.test

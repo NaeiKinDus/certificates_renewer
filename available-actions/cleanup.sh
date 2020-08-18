@@ -21,5 +21,3 @@ function cleanup() {
     fi
   fi
 }
-
-cleanup

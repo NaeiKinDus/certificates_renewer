@@ -33,5 +33,3 @@ function update_traefik() {
 TRAEFIK_DIR=${TRAEFIK_DIR:="/home/traefik/ssl"}
 TRAEFIK_USER=${TRAEFIK_USER:="traefik"}
 TRAEFIK_GROUP=${TRAEFIK_GROUP:="traefik"}
-
-update_traefik
