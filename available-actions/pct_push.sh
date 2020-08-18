@@ -17,10 +17,14 @@ function pct_push() {
   assert_defined "DST_FILE (\$3)" "${DST_FILE}"
   verbose_print "pct_push: DST_FILE=${DST_FILE}"
 
-  ${PCT_BIN} "${VM_ID}" "${SRC_FILE}" "${DST_FILE}"
-  if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-      quiet_print "Failed to execute command '${PCT_BIN} ${SRC_FILE} ${DST_FILE}'"
-      exit 4
+  if [[ ${DRY_RUN} -eq 1 ]]; then
+    quiet_print "${PCT_BIN} ${VM_ID} ${SRC_FILE} ${DST_FILE}"
+  else
+    ${PCT_BIN} "${VM_ID}" "${SRC_FILE}" "${DST_FILE}"
+    if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+        quiet_print "Failed to execute command '${PCT_BIN} ${SRC_FILE} ${DST_FILE}'"
+        exit 4
+    fi
   fi
 }
 
