@@ -208,7 +208,11 @@ while read -r LINE; do
   readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
   verbose_print "Executing '${CALL_STACK[*]}'"
   if [ -n "$(LC_ALL=C type -t "${CALL_STACK[0]}")" ]; then
-    ${CALL_STACK[*]}
+    if [[ ${DRY_RUN} -eq 1 ]]; then
+      quiet_print "${CALL_STACK[*]}"
+    else
+      ${CALL_STACK[*]}
+    fi
   else
     quiet_print "Action '${CALL_STACK[0]}' does not exist, ignored"
   fi
@@ -217,7 +221,11 @@ done <"${ACTIONS_CFG_FILE}"
 
 if [ $perform_cleanup -eq 1 ]; then
   quiet_print "performing cleanup..."
-  source "${SCRIPT_DIR}"/enabled-actions/cleanup.sh
+  if [[ ${DRY_RUN} -eq 1 ]]; then
+    quiet_print "executing ${SCRIPT_DIR}/enabled-actions/cleanup.sh"
+  else
+    source "${SCRIPT_DIR}"/enabled-actions/cleanup.sh
+  fi
 fi
 
 if [ $module_executed -eq 0 ]; then
