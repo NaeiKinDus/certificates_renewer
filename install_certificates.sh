@@ -203,6 +203,7 @@ while read -r LINE; do
     continue
   fi
 
+  # shellcheck disable=SC2086
   LINE="$(echo $LINE | envsubst)"
 
   readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
