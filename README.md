@@ -27,7 +27,7 @@ If your .lego directory is already populated:
 #### Using certificates
 Once the script has finished, the certificates can be found in the `.lego` directory.
 The script also works as a hook that is executed every time a certificate is generated.
-Take a look at `services.example.dat`, copy it to `services.dat`, modify it as needed, and the actions will be
+Take a look at `services.example.cfg`, copy it to `services.cfg`, modify it as needed, and the actions will be
 executed on `run`/`renew` actions.
 
 #### Remote configuration

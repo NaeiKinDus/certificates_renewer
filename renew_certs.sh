@@ -143,9 +143,9 @@ if [ "$1" == "hook" ]; then
   fi
 
   # shellcheck disable=SC2086
-  SERVICES_DAT_FILE="$(dirname ${0})/services.dat"
-  if [ ! -f "${SERVICES_DAT_FILE}" ]; then
-    quiet_print "File ${SERVICES_DAT_FILE} does not exist."
+  SERVICES_CFG_FILE="$(dirname ${0})/services.cfg"
+  if [ ! -f "${SERVICES_CFG_FILE}" ]; then
+    quiet_print "File ${SERVICES_CFG_FILE} does not exist."
     exit 1
   fi
 
@@ -215,7 +215,7 @@ if [ "$1" == "hook" ]; then
       $(${METHOD} ${METHOD_ARGS} 2>/dev/null)
     fi
     unset DOMAIN_DATA
-  done <"${SERVICES_DAT_FILE}"
+  done <"${SERVICES_CFG_FILE}"
   exit 0
 fi
 
