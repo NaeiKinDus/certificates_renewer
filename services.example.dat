@@ -3,8 +3,6 @@
 # /!\ NOTE /!\
 # It is not needed to add the "UserKnownHostsFile=/dev/null", it is automatically appended.
 # It is not needed to add the "StrictHostKeyChecking=no", it is automatically appended.
-# It is not needed to add the "-i" option for SSH / SCP, it will be automatically appended.
-# You may override SSH_ID to specify your own key.
 #
 # Available variables:
 ## $CERT_PATH: path to domain certificate
