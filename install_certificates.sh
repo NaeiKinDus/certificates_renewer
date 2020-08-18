@@ -153,11 +153,13 @@ if [ -z "${CERT_FILE}" ]; then
     quiet_print "Could not find a file matching *${MATCH_DOMAIN}*.crt in the directory '${CERT_DIR}'."
     exit 2
 fi
+export CERT_FILE
 
 if [ -z "${KEY_FILE}" ]; then
     quiet_print "Could not find a file matching *${MATCH_DOMAIN}*.key in the directory '${CERT_DIR}'."
     exit 2
 fi
+export KEY_FILE
 
 if [ -z "${DST_CERT_NAME}" ]; then
     # shellcheck disable=SC2086
@@ -200,6 +202,8 @@ while read -r LINE; do
   if [[ ${LINE:0:1} == "#" ]]; then
     continue
   fi
+
+  LINE="$(echo $LINE | envsubst)"
 
   readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
   verbose_print "Executing '${CALL_STACK[*]}'"
