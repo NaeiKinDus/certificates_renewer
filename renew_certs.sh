@@ -214,10 +214,12 @@ if [ "$1" == "hook" ]; then
       # shellcheck disable=SC2086
       $(${METHOD} ${METHOD_ARGS} 2>/dev/null)
     fi
+    unset DOMAIN_DATA
   done <"${SERVICES_DAT_FILE}"
   exit 0
 fi
 
+# Script main()
 if [ -z "${DNS_CHALLENGE_TYPE}" ]; then
   quiet_print "No DNS challenge specified, refer to the file '.env.example' to know how to set it up."
   exit 1
