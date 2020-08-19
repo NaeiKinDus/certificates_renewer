@@ -92,10 +92,10 @@ function do_chown() {
 
   for ITEM in "${@}"; do
     if [ "${VERBOSE}" -eq 1 ] || [ "${DRY_RUN}" -eq 1 ]; then
-      echo "chown ${USER}:${GROUP} ${ITEM}"
+      echo "/bin/chown ${USER}:${GROUP} ${ITEM}"
     fi
     if [ "$DRY_RUN" -ne 1 ]; then
-      chown "${USER}:${GROUP}" "${ITEM}"
+      /bin/chown "${USER}:${GROUP}" "${ITEM}"
     fi
   done
 }
@@ -106,10 +106,10 @@ function do_chmod() {
 
   for ITEM in "${@}"; do
     if [ "${VERBOSE}" -eq 1 ] || [ "${DRY_RUN}" -eq 1 ]; then
-      echo "chmod ${MOD} ${ITEM}"
+      echo "/bin/chmod ${MOD} ${ITEM}"
     fi
     if [ "${DRY_RUN}" -ne 1 ]; then
-      chmod "${MOD}" "${ITEM}"
+      /bin/chmod "${MOD}" "${ITEM}"
     fi
   done
 }

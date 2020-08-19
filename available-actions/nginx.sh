@@ -11,12 +11,16 @@ function update_nginx() {
   fi
 
   # CRT update
-  copy_files "${CERT_FILE}" "${NGINX_DIR}/${DEST_CERT_FILENAME}"
-  do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${NGINX_DIR}/${DEST_CERT_FILENAME}"
+  TARGET_CERT="${NGINX_DIR}/${DEST_CERT_FILENAME}"
+  copy_files "${CERT_FILE}" "${TARGET_CERT}"
+  do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${TARGET_CERT}"
 
   # Private key update
-  copy_files "${KEY_FILE}" "${NGINX_DIR}/${DEST_KEY_FILENAME}"
-  do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${NGINX_DIR}/${DEST_KEY_FILENAME}"
+  TARGET_KEY="${NGINX_DIR}/${DEST_KEY_FILENAME}"
+  copy_files "${KEY_FILE}" "${TARGET_KEY}"
+  do_chown "${NGINX_USER}" "${NGINX_GROUP}" "${TARGET_KEY}"
+
+  do_chmod 600 "${TARGET_CERT}" "${TARGET_KEY}"
 
   # Reloading Nginx
   verbose_print "Certificate updated, reloading Nginx..."
