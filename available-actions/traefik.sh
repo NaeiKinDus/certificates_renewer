@@ -10,6 +10,12 @@ function update_traefik() {
     exit 4
   fi
 
+  if [[ ${USE_SUDO} -eq 1 ]]; then
+    SUDO_CMD=${SUDO_BIN}
+  else
+    SUDO_CMD=
+  fi
+
   # CRT update
   copy_files "${CERT_FILE}" "${TRAEFIK_DIR}/${DEST_CERT_FILENAME}"
   do_chown "${TRAEFIK_USER}" "${TRAEFIK_GROUP}" "${TRAEFIK_DIR}/${DEST_CERT_FILENAME}"
@@ -20,9 +26,9 @@ function update_traefik() {
 
   verbose_print "Certificate updated, reloading Traefik..."
   if [[ $DRY_RUN -eq 1 ]]; then
-    quiet_print "/bin/systemctl restart traefik.service"
+    quiet_print "${SUDO_CMD} /bin/systemctl restart traefik.service"
   else
-    /bin/systemctl restart traefik.service
+    ${SUDO_CMD} /bin/systemctl restart traefik.service
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
       quiet_print "Could not restart Traefik, system might be in an unstable state"
       exit 4
@@ -33,3 +39,5 @@ function update_traefik() {
 TRAEFIK_DIR=${TRAEFIK_DIR:="/home/traefik/ssl"}
 TRAEFIK_USER=${TRAEFIK_USER:="traefik"}
 TRAEFIK_GROUP=${TRAEFIK_GROUP:="traefik"}
+USE_SUDO=${USE_SUDO:=0}
+SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
