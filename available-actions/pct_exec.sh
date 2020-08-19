@@ -23,6 +23,7 @@ function pct_exec() {
   if [[ ${DRY_RUN} -eq 1 ]]; then
     quiet_print "${SUDO_CMD} ${PCT_BIN} exec ${VM_ID} -- ${COMMAND}"
   else
+    # shellcheck disable=SC2086
     ${SUDO_CMD} "${PCT_BIN}" exec "${VM_ID}" -- ${COMMAND}
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
         quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} exec ${VM_ID} -- ${COMMAND}'"
