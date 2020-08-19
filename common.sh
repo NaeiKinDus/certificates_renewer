@@ -73,10 +73,10 @@ function copy_files() {
 
   verbose_print "Copying ${SRC_FILE} to ${DST_FILE}"
   if [[ $DRY_RUN -eq 1 ]]; then
-    quiet_print "/bin/cp ${SRC_FILE} ${DST_FILE}"
+    quiet_print "${SUDO_CMD} /bin/cp ${SRC_FILE} ${DST_FILE}"
   else
-    verbose_print "/bin/cp ${SRC_FILE} ${DST_FILE}"
-    /bin/cp "${SRC_FILE}" "${DST_FILE}"
+    verbose_print "${SUDO_CMD} /bin/cp ${SRC_FILE} ${DST_FILE}"
+    ${SUDO_CMD} /bin/cp "${SRC_FILE}" "${DST_FILE}"
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
       quiet_print "Could not copy files to ${DST_FILE}"
       exit 4
@@ -92,10 +92,10 @@ function do_chown() {
 
   for ITEM in "${@}"; do
     if [ "${VERBOSE}" -eq 1 ] || [ "${DRY_RUN}" -eq 1 ]; then
-      echo "/bin/chown ${USER}:${GROUP} ${ITEM}"
+      echo "${SUDO_CMD} /bin/chown ${USER}:${GROUP} ${ITEM}"
     fi
     if [ "$DRY_RUN" -ne 1 ]; then
-      /bin/chown "${USER}:${GROUP}" "${ITEM}"
+      ${SUDO_CMD} /bin/chown "${USER}:${GROUP}" "${ITEM}"
     fi
   done
 }
@@ -106,10 +106,19 @@ function do_chmod() {
 
   for ITEM in "${@}"; do
     if [ "${VERBOSE}" -eq 1 ] || [ "${DRY_RUN}" -eq 1 ]; then
-      echo "/bin/chmod ${MOD} ${ITEM}"
+      echo "${SUDO_CMD} /bin/chmod ${MOD} ${ITEM}"
     fi
     if [ "${DRY_RUN}" -ne 1 ]; then
-      /bin/chmod "${MOD}" "${ITEM}"
+      ${SUDO_CMD} /bin/chmod "${MOD}" "${ITEM}"
     fi
   done
 }
+
+USE_SUDO=${USE_SUDO:=0}
+SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
+
+if [[ ${USE_SUDO} -eq 1 ]]; then
+    SUDO_CMD=${SUDO_BIN}
+  else
+    SUDO_CMD=
+fi
