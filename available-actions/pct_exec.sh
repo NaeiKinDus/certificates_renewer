@@ -23,7 +23,7 @@ function pct_exec() {
   if [[ ${DRY_RUN} -eq 1 ]]; then
     quiet_print "${SUDO_CMD} ${PCT_BIN} exec ${VM_ID} -- ${COMMAND}"
   else
-    ${SUDO_CMD} "${PCT_BIN}" exec "${VM_ID} -- ${COMMAND}"
+    ${SUDO_CMD} "${PCT_BIN}" exec "${VM_ID}" -- ${COMMAND}
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
         quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} exec ${VM_ID} -- ${COMMAND}'"
         exit 4
