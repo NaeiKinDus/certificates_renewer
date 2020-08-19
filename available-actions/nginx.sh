@@ -10,6 +10,12 @@ function update_nginx() {
     exit 4
   fi
 
+  if [[ ${USE_SUDO} -eq 1 ]]; then
+    SUDO_CMD=${SUDO_BIN}
+  else
+    SUDO_CMD=
+  fi
+
   # CRT update
   TARGET_CERT="${NGINX_DIR}/${DEST_CERT_FILENAME}"
   copy_files "${CERT_FILE}" "${TARGET_CERT}"
@@ -25,11 +31,11 @@ function update_nginx() {
   # Reloading Nginx
   verbose_print "Certificate updated, reloading Nginx..."
   if [[ $DRY_RUN -eq 1 ]]; then
-    quiet_print "/bin/systemctl restart nginx.service"
+    quiet_print "${SUDO_CMD} /bin/systemctl restart nginx.service"
   else
-    /bin/systemctl restart nginx.service
+    ${SUDO_CMD} /bin/systemctl restart nginx.service
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-      quiet_print "Could not reload nginx, system might be in an unstable state"
+      quiet_print "Could not restart nginx, system might be in an unstable state"
       exit 4
     fi
   fi
@@ -39,3 +45,5 @@ function update_nginx() {
 NGINX_USER=${NGINX_USER:="www-data"}
 NGINX_GROUP=${NGINX_GROUP:="www-data"}
 NGINX_DIR=${NGINX_DIR:="/etc/nginx/ssl"}
+USE_SUDO=${USE_SUDO:=0}
+SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
