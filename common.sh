@@ -99,3 +99,17 @@ function do_chown() {
     fi
   done
 }
+
+function do_chmod() {
+  MOD="${1}"
+  shift
+
+  for ITEM in "${@}"; do
+    if [ "${VERBOSE}" -eq 1 ] || [ "${DRY_RUN}" -eq 1 ]; then
+      echo "chmod ${MOD} ${ITEM}"
+    fi
+    if [ "${DRY_RUN}" -ne 1 ]; then
+      chmod "${MOD}" "${ITEM}"
+    fi
+  done
+}
