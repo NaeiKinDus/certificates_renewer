@@ -28,7 +28,7 @@ function pct_push() {
   else
     ${SUDO_CMD} "${PCT_BIN}" push "${VM_ID}" "${SRC_FILE}" "${DST_FILE}"
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-        quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} push ${VMID} ${SRC_FILE} ${DST_FILE}'"
+        quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} push ${VM_ID} ${SRC_FILE} ${DST_FILE}'"
         exit 4
     fi
   fi
