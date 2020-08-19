@@ -24,11 +24,11 @@ function pct_push() {
   fi
 
   if [[ ${DRY_RUN} -eq 1 ]]; then
-    quiet_print "${SUDO_CMD} ${PCT_BIN} ${VM_ID} ${SRC_FILE} ${DST_FILE}"
+    quiet_print "${SUDO_CMD} ${PCT_BIN} push ${VM_ID} ${SRC_FILE} ${DST_FILE}"
   else
-    ${SUDO_CMD} "${PCT_BIN}" "${VM_ID}" "${SRC_FILE}" "${DST_FILE}"
+    ${SUDO_CMD} "${PCT_BIN}" push "${VM_ID}" "${SRC_FILE}" "${DST_FILE}"
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-        quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} ${SRC_FILE} ${DST_FILE}'"
+        quiet_print "Failed to execute command '${SUDO_CMD} ${PCT_BIN} push ${SRC_FILE} ${DST_FILE}'"
         exit 4
     fi
   fi
@@ -37,3 +37,7 @@ function pct_push() {
 PCT_BIN=${PCT_BIN:="/usr/sbin/pct"}
 USE_SUDO=${USE_SUDO:=0}
 SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
+
+# Sudoers example:
+# Cmnd_Alias PCT_PUSH = /usr/sbin/pct push [[\:digit\:]][[\:digit\:]][[\:digit\:]] /opt/cert_manager/new_certificates/*
+# certificates_manager ALL=NOPASSWD: PCT_PUSH
