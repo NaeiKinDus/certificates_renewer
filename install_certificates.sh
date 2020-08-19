@@ -185,7 +185,6 @@ module_executed=0
 perform_cleanup=0
 quiet_print "loading enabled actions..."
 for action in "${SCRIPT_DIR}"/enabled-actions/*.sh; do
-  module_executed=1
   if [[ "${action}" =~ .*/cleanup.sh ]]; then
     verbose_print "- cleanup required, will be executed after all the other actions are executed"
     perform_cleanup=1
@@ -209,6 +208,7 @@ while read -r LINE; do
   readarray -c1 -C 'mfcb val_trim CALL_STACK' -td, <<<"${LINE}"
   verbose_print "Executing '${CALL_STACK[*]}'"
   if [ -n "$(LC_ALL=C type -t "${CALL_STACK[0]}")" ]; then
+      module_executed=1
       ${CALL_STACK[*]}
   else
     quiet_print "Action '${CALL_STACK[0]}' does not exist, ignored"
