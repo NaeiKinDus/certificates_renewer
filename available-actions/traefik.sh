@@ -47,4 +47,5 @@ SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
 # Cmnd_Alias CHMOD_TRAEFIK = /bin/chmod 600 /home/traefik/ssl/domain.crt, /bin/chmod 600 /home/traefik/ssl/domain.key
 # Cmnd_Alias CHOWN_TRAEFIK = /bin/chown traefik\:traefik /home/traefik/ssl/domain.crt, /bin/chown traefik\:traefik /home/traefik/ssl/domain.key
 # Cmnd_Alias RESTART_TRAEFIK = /bin/systemctl restart traefik.service
+#
 # certificates_manager ALL=NOPASSWD: CP_TRAEFIK, CHMOD_TRAEFIK, CHOWN_TRAEFIK, RESTART_TRAEFIK
