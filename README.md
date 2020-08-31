@@ -1,9 +1,9 @@
 ## Introduction
-This tool is composed two shell scripts used as a wrapper around [Go-Acme's Lego](https://github.com/go-acme/lego) and an automatic
+This tool is composed of two shell scripts used as a wrapper around [Go-Acme's Lego](https://github.com/go-acme/lego) and an automatic
 certificate updater. You can easily configure where and how your **LE** certificates are pushed, easing the administration
 of your HTTPS services.
 Both scripts are configured either using command-line flags (call `<script.sh> --help` to have more information), or an
-environment file (`.env`) which has an example of located at `.env.example`.
+environment file (`.env`) which has an example located at `.env.example`.
 
 ### Certificate generation
 The `renew_certs.sh` shell script is the wrapper around **Lego** and will take care of creating or renewing your HTTPS
@@ -31,20 +31,19 @@ another.io,scp,-i $CURRENT_DIR/ssh_identity/id_ed25519 $CERT_PATH $PRIV_KEY_PATH
 
 ### Certificate installation
 The `install_certificates.sh` shell script is used to install and restart services that need the updated certificate file
-sent by the `renew_certs.sh` script. Using the file `actions.cfg` and pre-made "actions", located in the `available-actions`
-directory, this script will know what actions should be executed to perform its duty.
+sent by the `renew_certs.sh` script. The script will use the file `actions.cfg` and pre-made "actions" located in the `available-actions`
+directory.
 
 #### Actions
-Actions are a way for you to tell the installation script what you want it to do. It comes in two flavor: pre-made actions,
+Actions are a way for you to tell the installation script what you want it to do. It comes in two flavors: pre-made actions,
 essentially a small script that performs multiple tasks, and core actions, which are basic one-task functions.
 
 ##### Pre-made actions
 They are available in the `available-actions` directory, such as `nginx.sh`, and are used for well-known services to
-avoid you the hassle of doing it by yourself. To use them you first have to enable the selected one using a symlink from
-the `available-actions` directory to the `enabled-actions` one. Then you have to reference it, with the assorted arguments
-required if applicable, in the `actions.cfg` file.
+avoid you the hassle of doing it by yourself. To use them you first have to enable the selected one by creating a symlink from
+the `available-actions` directory to the `enabled-actions` one. Then you have to reference the action in the `actions.cfg` file -with the assorted arguments required if applicable.
 
-Here's an example of what it would look like in said file:
+Here is an example of what it would look like in said file:
 ```bash
 # Actions are below this line
 update_nginx
@@ -52,9 +51,9 @@ pct_push,114,${CERT_FILE},/tmp${CERT_FILE}
 pct_exec,114,ls -lah /root
 ```
 
-Here's a non-exhaustive list of existing pre-made actions:
+Here is a non-exhaustive list of existing pre-made actions:
 - nginx.sh: used to update certificates for NginX,
-- pct_exec.sh: used to exec commands for Proxmox containers,
+- pct_exec.sh: used to execute commands for Proxmox containers,
 - pct_push.sh: used to push files to Proxmox containers,
 - traefik.sh: used to update certificates for Traefik,
 - cleanup.sh: called after all other actions, used to remove the certificates once they are successfully installed
@@ -63,26 +62,26 @@ everywhere else.
 ##### Core actions
 Core actions are single-task actions performing a basic task like copying a file, changing the permissions of a file
 or executing a shell action. They are useful if your setup does not match the one expected by a pre-made action or if
-there is no pre-made action available for your specific need. They also are the functions called by pre-made actions !
+there is no pre-made action available for your specific need. They are also the functions called by pre-made actions.
 If you want to see a list of what you can call, just take a look at the functions in `common.sh`.
 
-Here's a non-exhaustive list of these actions and what they do:
-- quiet_print: print a message if `-q` flag is **NOT** specified,
-- verbose_print: print a message if `-v` flag **IS** specified,
+Here is a non-exhaustive list of these actions and what they do:
+- quiet_print: prints a message if `-q` flag is **NOT** specified,
+- verbose_print: prints a message if `-v` flag **IS** specified,
 - assert_defined: asserts a variable is not empty,
-- assert_executable: asserts a file name is an executable,
+- assert_executable: asserts a file name is an executable file,
 - copy_files: copies a file to a specific destination,
 - do_chown: performs a chown on a file,
 - do_chmod: performs a chmod on a file.
 
-To use a core action you only have to declare its call in `actions.cfg`, no need to enable anything in `enabled-actions`.
+To use a core action you only have to reference it in `actions.cfg`, no need to enable anything in `enabled-actions`.
 
 ##### Actions configuration
-The file `actions.cfg` is used to execute a series of actions to update all services. To this end, you have access to
-several pre-made actions, but you can also create yours. Either create your own shell script in `actions-available` and
-then enable it, or use available core actions to create your own scenario. To this end, you have access to several variables:
+The file `actions.cfg` is used to execute a series of actions to update all services. You have access to
+several pre-made actions, but you can also create your own. Either create your own shell script in `actions-available` and
+then enable it, or use available core actions to create your own scenario. You have access to several variables:
 - DRY_RUN (0 or 1): set to 1 if no actions should be performed,
-- EMAIL_CONTACT (string): email to send reports to; also used by Let's Encrypt,
+- EMAIL_CONTACT (string): used by Let's Encrypt,
 - NO_OUTPUT (0 or 1): set to 1 if no output is expected,
 - VERBOSE (0 or 1): set to 1 if extra information should be printed,
 - ENV_FILE (string): path to the loaded `.env` file,
@@ -120,7 +119,7 @@ To install this project on your machine that will query Let's Encrypt you just h
 - git
 
 Optional, but recommended:
-- sudo, if the root account is not used,
+- sudo, if the root account is not used.
 
 
 To install this project on your clients you just have to clone the repository. It is advised to use a dedicated user for
