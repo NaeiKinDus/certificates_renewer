@@ -220,9 +220,9 @@ if [ $perform_cleanup -eq 1 ]; then
   quiet_print "performing cleanup..."
   if [[ ${DRY_RUN} -eq 1 ]]; then
     quiet_print "executing ${SCRIPT_DIR}/enabled-actions/cleanup.sh"
-  else
-    source "${SCRIPT_DIR}"/enabled-actions/cleanup.sh
   fi
+  source "${SCRIPT_DIR}"/enabled-actions/cleanup.sh
+  cleanup
 fi
 
 if [ $module_executed -eq 0 ]; then
