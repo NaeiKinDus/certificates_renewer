@@ -20,6 +20,7 @@ OPTIONS
 -d/--dry-run: print the commands instead of running them
 -c/--cert-name <filename>: name used for the certificate file in destination (must include file extension)
 -k/--key-name <filename>: name used for the private key file in destination (must include file extension)
+--cron-mode: existence checks of certificates do not trigger an error and silently stop the command; useful when used with the cleanup action in a cron setting
 EOF
 }
 
@@ -39,7 +40,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
 fi
 
 OPTIONS=hvm:e:ds:c:k:q
-LONGOPTS=help,verbose,email:,env:,dry-run,domain:,cert-name:,key-name:,quiet
+LONGOPTS=help,verbose,email:,env:,dry-run,domain:,cert-name:,key-name:,quiet,cron-mode
 
 ! PARSED=$(getopt --options=${OPTIONS} --longoptions=${LONGOPTS} --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
@@ -61,11 +62,13 @@ DST_CERT_NAME=${DST_CERT_NAME:=""}
 DST_KEY_NAME=${DST_KEY_NAME:=""}
 NO_OUTPUT=${NO_OUTPUT:=0}
 ENV_FILE=${ENV_FILE:="${SCRIPT_DIR}/.env"}
+CRON_MODE=${CRON_MODE:=0}
 
 export DRY_RUN
 export EMAIL_CONTACT
 export NO_OUTPUT
 export VERBOSE
+export CRON_MODE
 
 # Options
 while true; do
@@ -106,6 +109,10 @@ while true; do
 	    NO_OUTPUT=1
 	    shift
 	    ;;
+	--cron-mode)
+	    CRON_MODE=1
+	    shift
+	    ;;
 	--)
 	    shift
 	    break
@@ -137,8 +144,8 @@ if [ ! -f "${ACTIONS_CFG_FILE}" ]; then
 fi
 
 CERT_DIR="$(realpath "${1}")"
-CERT_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.crt 2> /dev/null)"
-KEY_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.key 2> /dev/null)"
+CERT_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.crt 2> /dev/null || true)"
+KEY_FILE="$(find "${CERT_DIR}" -iname \*"${MATCH_DOMAIN}"\*.key 2> /dev/null || true)"
 
 # shellcheck disable=SC2086
 if [[ "$(echo \"${CERT_FILE}\" | wc -w)" -gt 1 ]]; then
@@ -150,6 +157,10 @@ elif [[ "$(echo \"${KEY_FILE}\" | wc -w)" -gt 1 ]]; then
 fi
 
 if [ -z "${CERT_FILE}" ]; then
+    if [[ ${CRON_MODE} -eq 1 ]]; then
+      verbose_print "Could not find a file matching *${MATCH_DOMAIN}*.crt in the directory '${CERT_DIR}'."
+      exit 0
+    fi
     quiet_print "Could not find a file matching *${MATCH_DOMAIN}*.crt in the directory '${CERT_DIR}'."
     exit 2
 fi

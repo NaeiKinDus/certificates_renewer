@@ -172,14 +172,24 @@ Take a look at `services.example.cfg`, copy it to `services.cfg`, modify it as n
 executed on `run`/`renew` actions.
 
 ### Services
-The new certificates are expected to be present in a directory called "new_certificates". If only one domain is handled,
-you can simply do:
+Suppose the new certificates are located in a directory called "new_certificates".
+
+If only one domain is handled, you can simply do:
 ```bash
 # directory "new_certificates" contains new certificates to install.
-./install_certiificates.sh ./new_certificates
+./install_certificates.sh ./new_certificates
 ```
 
 If you handle multiple domains, you can use a discriminator:
 ```bash
-./install_certiificates.sh -s your_domain.com ./new_certificates
+./install_certificates.sh -s your_domain.com ./new_certificates
+```
+
+If you want to set up a cron task to automatically check for new certificates and install them you can use the `--cron-mode` which does not raise errors if no certificates is found.
+This mode is particularly useful, as its name suggests, when used in a cron task, to avoid triggering errors.
+
+Here's an example of a cron task using said mode:
+```bash
+# m h  dom mon dow   command
+0 5,17 * * * /opt/cert_manager/legorenewer/install_certificates.sh --cron-mode /opt/cert_manager/new_certificates/ >> /var/log/cert_renewer.log 2>&1
 ```
