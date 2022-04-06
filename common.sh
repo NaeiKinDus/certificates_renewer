@@ -29,7 +29,7 @@ function val_trim() {
 
 function quiet_print() {
   if [[ $NO_OUTPUT -eq 0 ]]; then
-    echo -e "${1}"
+    echo -e "${@}"
   fi
 }
 
