@@ -24,21 +24,29 @@ function update_traefik() {
   copy_files "${KEY_FILE}" "${TRAEFIK_DIR}/${DEST_KEY_FILENAME}"
   do_chown "${TRAEFIK_USER}" "${TRAEFIK_GROUP}" "${TRAEFIK_DIR}/${DEST_KEY_FILENAME}"
 
-  verbose_print "Certificate updated, reloading Traefik..."
-  if [[ $DRY_RUN -eq 1 ]]; then
-    quiet_print "${SUDO_CMD} /bin/systemctl restart traefik.service"
-  else
-    ${SUDO_CMD} /bin/systemctl restart traefik.service
-    if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-      quiet_print "Could not restart Traefik, system might be in an unstable state"
-      exit 4
-    fi
-  fi
+  case "${TRAEFIK_AUTORESTART}" in
+    1 | "yes" | "true" | "y")
+      verbose_print "Certificate updated, reloading Traefik..."
+      if [[ $DRY_RUN -eq 1 ]]; then
+        quiet_print "${SUDO_CMD} /bin/systemctl restart traefik.service"
+      else
+        ${SUDO_CMD} /bin/systemctl restart traefik.service
+        if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+          quiet_print "Could not restart Traefik, system might be in an unstable state"
+          exit 4
+        fi
+      fi
+      ;;
+    0 | "no" | "false" | "n")
+      verbose_print "Traefik autorestart disabled, will not restart it."
+      ;;
+  esac
 }
 
 TRAEFIK_DIR=${TRAEFIK_DIR:="/home/traefik/ssl"}
 TRAEFIK_USER=${TRAEFIK_USER:="traefik"}
 TRAEFIK_GROUP=${TRAEFIK_GROUP:="traefik"}
+TRAEFIK_AUTORESTART=${TRAEFIK_AUTORESTART:=1}
 USE_SUDO=${USE_SUDO:=0}
 SUDO_BIN=${SUDO_BIN:="/usr/bin/sudo"}
 
