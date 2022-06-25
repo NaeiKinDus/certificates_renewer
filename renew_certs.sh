@@ -244,7 +244,7 @@ if [ ! -f "${LEGO_BIN}" ]; then
 fi
 
 # Find if provided DNS challenge is supported
-mapfile -t -d ' ' MODULES_LIST < <("${LEGO_BIN}" dnshelp | awk '/All DNS codes/{modules=1;next}/More information/{modules=0}{gsub(/,/,"",$0)}modules{print}')
+mapfile -t -d ' ' MODULES_LIST < <("${LEGO_BIN}" --path "${DOT_LEGO_DIR}" dnshelp | awk '/All DNS codes/{modules=1;next}/More information/{modules=0}{gsub(/,/,"",$0)}modules{print}')
 if [[ ! "${MODULES_LIST[*]}" =~ ${DNS_CHALLENGE_TYPE} ]]; then
   quiet_print "Invalid DNS challenge provided: ${DNS_CHALLENGE_TYPE}"
   quiet_print "Supported modules:\n${MODULES_LIST[*]}"
