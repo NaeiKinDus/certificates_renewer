@@ -31,6 +31,7 @@ source "${SCRIPT_DIR}/common.sh"
 # Shell script entry #
 #####################
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+# shellcheck disable=SC2251
 ! getopt --test >/dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
   echo -e "Getopt not available, please install linux-utils or similar package."
@@ -41,6 +42,7 @@ fi
 OPTIONS=s:e:vhdqo
 LONGOPTS=server:,env:,verbose,help,dry-run,quiet,ocsp-stapling
 
+# shellcheck disable=SC2251
 ! PARSED=$(getopt --options=${OPTIONS} --longoptions=${LONGOPTS} --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
   exit 2
@@ -60,7 +62,7 @@ NO_OUTPUT=${NO_OUTPUT:=0}
 STAPLE=${STAPLE:=""}
 EMAIL_CONTACT=${EMAIL_CONTACT:=""}
 DRY_RUN=${DRY_RUN:=0}
-DNS_CHALLENGE_TYPE=${DNS_CHALLENGE_TYPE}
+DNS_CHALLENGE_TYPE=${DNS_CHALLENGE_TYPE:=""}
 ENV_FILE=${ENV_FILE:="${SCRIPT_DIR}/.env"}
 DNS_RESOLVERS=${DNS_RESOLVERS:=""}
 
